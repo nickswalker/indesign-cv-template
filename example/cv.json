@@ -1,0 +1,286 @@
+{
+ "basics": {
+  "name": "John Doe",
+  "label": "Ph.D. Student in Computer Science",
+  "email": "nswalker@cs.uw.edu",
+  "website": "https://nickwalker.us",
+  "summary": "Nick Walker is a Ph.D. student in Computer Science at the University of Washington in Seattle.",
+  "profiles": [
+   {
+    "network": "Twitter",
+    "username": "nickwalker_us",
+    "url": "https://twitter.com/nickwalker_us"
+   },
+   {
+    "network": "ORCID",
+    "username": "0000-0001-7711-0003",
+    "url": "https://orcid.org/0000-0001-7711-0003"
+   },
+   {
+    "network": "GitHub",
+    "username": "nickswalker",
+    "url": "https://github.com/nickswalker"
+   }
+  ]
+ },
+ "work": [
+  {
+   "company": "UW CSE 481C",
+   "position": "Teaching Assistant",
+   "website": "https://courses.cs.washington.edu/courses/cse481c/19wi/",
+   "date": "Winter 2019",
+   "highlights": [
+    "Developed assignments and supported undergraduates using the Kuri robot for their robotics capstone course"
+   ]
+  },
+  {
+   "company": "USAA",
+   "position": "Research Engineer Intern",
+   "website": "https://usaa.com",
+   "date": "Summer 2016",
+   "highlights": [
+    "Developed experimental brain-computer interface software and hardware",
+    "Work contributed to a SPIE conference publication"
+   ]
+  }
+ ],
+ "volunteer": [
+  {
+   "organization": "RoboCup@Home",
+   "position": "Technical Committee",
+   "website": "https://athome.robocup.org/committees/",
+   "startDate": "2019"
+  },
+  {
+   "organization": "Allen School First Year Graduate Student Mentoring, UW",
+   "position": "Peer Mentor",
+   "startDate": "2019"
+  }
+ ],
+ "education": [
+  {
+   "institution": "The University of Washington, Seattle, WA.",
+   "area": "Computer Science",
+   "studyType": "Ph.D.",
+   "startDate": "2018",
+   "courses": []
+  },
+  {
+   "institution": "The University of Texas, Austin, TX.",
+   "area": "Computer Science",
+   "studyType": "BSA",
+   "startDate": "2014",
+   "endDate": "2018",
+   "highlights": [
+    {
+     "description": "Polymathic Scholar (Interdisciplinary Honors)",
+     "link": "https://cns.utexas.edu/honors/honors-programs-center/polymathic"
+    }
+   ],
+   "courses": []
+  }
+ ],
+ "awards": [
+  {
+   "title": "Graduate Research Fellowship",
+   "startDate": "2020",
+   "awarder": "National Science Foundation"
+  },
+  {
+   "title": "Computer Science & Engineering Research Fellowship",
+   "startDate": "2018",
+   "endDate": "2019",
+   "awarder": "Allen School, UW"
+  }
+ ],
+ "publications": [
+  {
+   "type": "conference",
+   "name": "Human Perceptions of a Curious Robot that Performs Off-Task Actions",
+   "authors": "N.\u00a0Walker, K.\u00a0Weatherwax, J.\u00a0Alchin, L.\u00a0Takayama, M.\u00a0Cakmak",
+   "location": "Oxford, UK",
+   "publisher": "ACM/IEEE Int. Conf. Human-Robot Interaction",
+   "releaseDate": "March 2020",
+   "link": "https://nickwalker.us/publications/walker2020perceptions"
+  },
+  {
+   "type": "journal",
+   "name": "Jointly Improving Parsing and Perception for Natural Language Commands through Human-Robot Dialog",
+   "authors": "J.\u00a0Thomason, A.\u00a0Padmakumar, J.\u00a0Sinapov, N.\u00a0Walker, Y.\u00a0Jiang, H.\u00a0Yedidsion, J.\u00a0Hart, P.\u00a0Stone, R.\u00a0J.\u00a0Mooney",
+   "publisher": "Journal of Artificial Intelligence Research",
+   "releaseDate": "February 2020",
+   "link": "https://nickwalker.us/publications/thomason2020improving"
+  },
+  {
+   "type": "conference",
+   "name": "Open-World Reasoning for Service Robots",
+   "authors": "Y.\u00a0Jiang, N.\u00a0Walker, J.\u00a0Hart, P.\u00a0Stone",
+   "location": "Berkeley",
+   "publisher": "Proc. 29th Int. Conf. Automated Planning Scheduling",
+   "releaseDate": "July 2019",
+   "link": "https://nickwalker.us/publications/jiang2019icaps"
+  },
+  {
+   "type": "workshop",
+   "name": "Desiderata for Planning Systems in General-Purpose Service Robots",
+   "authors": "N.\u00a0Walker, Y.\u00a0Jiang, M.\u00a0Cakmak, P.\u00a0Stone",
+   "location": "Berkeley",
+   "publisher": "Proc. of 2019 ICAPS Workshop Planning Robotics",
+   "releaseDate": "July 2019",
+   "link": "https://nickwalker.us/publications/walker2019planrob"
+  },
+  {
+   "type": "symposium",
+   "name": "Neural Semantic Parsing with Anonymization for Command Understanding in General-Purpose Service Robots",
+   "authors": "N.\u00a0Walker, Y.-T.\u00a0Peng, M.\u00a0Cakmak",
+   "location": "Sydney",
+   "publisher": "RoboCup 2019: Robot Soccer World Cup XXIII",
+   "releaseDate": "July 2019",
+   "link": "https://nickwalker.us/publications/walker2019robocup"
+  }
+ ],
+ "skills": [
+  {
+   "name": "Robotics software",
+   "level": "Experienced",
+   "keywords": [
+    "ROS",
+    "C++",
+    "Python"
+   ]
+  },
+  {
+   "name": "Web Technologies",
+   "level": "Proficient",
+   "keywords": [
+    "PHP",
+    "Typescript",
+    "HTML",
+    "CSS"
+   ]
+  }
+ ],
+ "affiliations": [
+  {
+   "name": "Human-Centered Robotics Lab",
+   "institution": "University of Washington",
+   "summary": "PI: Maya Cakmak",
+   "startDate": "2018",
+   "link": "https://hcrlab.cs.washington.edu"
+  },
+  {
+   "name": "UT Austin Villa@Home",
+   "institution": "University of Texas at Austin",
+   "summary": "PIs: P. Stone, L. Sentis, S. Niekum, A. Thomaz, R. Mooney. Supervisor: Justin Hart",
+   "startDate": "2017",
+   "endDate": "2018",
+   "link": "https://wncg.org/news/ut-austin-takes-3rd-place-robocuphome-2017-competition-japan"
+  },
+  {
+   "name": "Building-Wide Intelligence Project",
+   "institution": "UT AI Lab",
+   "summary": "PI: Peter Stone. Supervisors: Matteo Leonetti, Jivko Sinapov, Justin Hart",
+   "startDate": "2015",
+   "endDate": "2018",
+   "link": "https://www.cs.utexas.edu/~larg/bwi_web/"
+  }
+ ],
+ "outreach": [
+  {
+   "organization": "UW Engineering Discovery Days",
+   "position": "Demo Assistant",
+   "website": "https://www.engr.washington.edu/future/k12/discoverydays",
+   "date": "2019",
+   "summary": "Organized and helped run an exhibit demonstrating our lab's research"
+  },
+  {
+   "organization": "UTCS Robotics Camp",
+   "position": "Program Assistant",
+   "website": "https://texas-robocamp.github.io",
+   "date": "2019",
+   "summary": "Helped high school students assemble robot kit, program intelligent behaviors"
+  }
+ ],
+ "grants": [
+  {
+   "name": "A Speech and Language Dataset of GPSR Commands (League Development Grant)",
+   "awarder": "RoboCup Federation",
+   "date": "2020"
+  }
+ ],
+ "presentations": [
+  {
+   "name": "Human Perceptions of a Curious Robot that Performs Off-Task Actions",
+   "venue": "Honda Research Institute Curious Minded Machines Workshop",
+   "date": "2019",
+   "location": "San Jose",
+   "authors": "N. Walker",
+   "format": "Oral"
+  },
+  {
+   "name": "Desiderata for Planning for Planning Systems in General Purpose Service Robots",
+   "venue": "ICAPS PlanRob Workshop",
+   "date": "2019",
+   "location": "Berkeley",
+   "authors": "N. Walker",
+   "format": "Oral"
+  },
+  {
+   "name": "Neural Semantic Parsing with Anonymization for Command Understanding in General Purpose Service Robots",
+   "venue": "RoboCup Symposium",
+   "date": "2019",
+   "location": "Sydney",
+   "authors": "N. Walker",
+   "format": "Oral"
+  },
+  {
+   "name": "UT Austin Villa@Home",
+   "venue": "RoboCup@Home Domestic Standard Platform League",
+   "date": "2018",
+   "location": "Sydney",
+   "authors": "N. Walker for UT Austin Villa",
+   "format": "Oral",
+   "link": "https://doi.org/10.5281/zenodo.3249235",
+   "note": "Best DSPL Poster"
+  },
+  {
+   "name": "Automatic Curriculum Graph Generation for Reinforcement Learning Agents",
+   "venue": "AAAI",
+   "date": "2017",
+   "location": "San Francisco",
+   "authors": "N. Walker, R. Shah",
+   "format": "Poster",
+   "link": "https://doi.org/10.5281/zenodo.3244636"
+  }
+ ],
+ "competitions": [
+  {
+   "result": "5th Place, UT Austin Villa@Home",
+   "name": "RoboCup@Home DSPL",
+   "date": "2018"
+  },
+  {
+   "result": "3rd Place, UT Austin Villa@Home",
+   "name": "RoboCup@Home DSPL",
+   "date": "2017",
+   "link": "https://www.ece.utexas.edu/news/ut-austin-takes-3rd-place-robocuphome-2017-competition-japan"
+  }
+ ],
+ "meetings": [
+  {
+   "name": "Honda Research Institute Curious Minded Machine Workshop",
+   "date": "2019",
+   "location": "San Jose"
+  },
+  {
+   "name": "ICAPS",
+   "date": "2019",
+   "location": "Berkeley"
+  },
+  {
+   "name": "RoboCup",
+   "date": "2019",
+   "location": "Sydney"
+  }
+ ]
+}
