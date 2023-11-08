@@ -24,11 +24,19 @@ app.scriptPreferences.userInteractionLevel = UserInteractionLevels.INTERACT_WITH
 myDocument = app.activeDocument;
 paraStyles = {
     name: getParagraphStyle("Name"),
-    sectionTitle: getParagraphStyle("Section Title"),
-    sectionTitleFirst: getParagraphStyle("Section Title (First)"),
+    h1: getParagraphStyle("Header 1"),
+    h1First: getParagraphStyle("Header 1 (First)"),
+    h2: getParagraphStyle("Header 2"),
+    h3: getParagraphStyle("Header 3"),
+    h3Subtitle: getParagraphStyle("Header 3 (With Subtitle)"),
+    h3SubtitleDate: getParagraphStyle("Header 3 (With Subtitle, Date Lead)"),
     dateBullet: getParagraphStyle("Date Bullet"),
-    hangingBullet: getParagraphStyle("Hanging Bullet"),
-    basic: myDocument.paragraphStyles.item("[Basic Paragraph]")
+    publicationBullet: getParagraphStyle("Publication Bullet"),
+    bullet: getParagraphStyle("Basic Bullet"),
+	indentedBullet: myDocument.paragraphStyles.item("Indented Bullet"),
+    bulletYears: getParagraphStyle("Bullet (Year List)"),
+    basic: myDocument.paragraphStyles.item("[Basic Paragraph]"),
+    indented: myDocument.paragraphStyles.item("Indented")
 };
 charStyles = {
     italic: getCharacterStyle("Italic"),
@@ -134,15 +142,23 @@ function setLinkRange(range, link) {
     }
 }
 
+function makeDateString(startDate, endDate) {
+	var content = "";
+	if (startDate) {
+		content += startDate;
+		if (endDate) {
+			content += "\u2013" + endDate.substr(-2);
+		} else {
+			content += "\u2014"
+		}
+	}
+	return content;
+}
+
 function appendDateBullet(specs, story) {
     var content = "";
     if (specs.startDate) {
-        content += specs.startDate;
-        if (specs.endDate) {
-            content += "\u2013" + specs.endDate.substr(-2);
-        } else {
-            content += "\u2014"
-        }
+        content += makeDateString(specs.startDate, specs.endDate)
         content += "\t"
     } else if (specs.date) {
         content += specs.date + "\t";
@@ -166,6 +182,61 @@ function appendDateBullet(specs, story) {
     return paragraph;
 }
 
+function appendH3DateSubtitle(specs, story) {
+	var content = "";
+	if (specs.startDate) {
+		content += makeDateString(specs.startDate, specs.endDate)
+		content += "\t"
+	} else if (specs.date) {
+		content += specs.date + "\t";
+	}
+	content += specs.content;
+
+	if (specs.extra) {
+		content += " \u2013 " + specs.extra
+	}
+	var paragraph = appendPara(content, story, paraStyles.h3SubtitleDate);
+	if (specs.link) {
+		var hyperLink = addHyperlinkDestination(myDocument, specs.link);
+		var characters = paragraph.characters.itemByRange(0, content.length - 1);
+		var source = addHyperlinkTextSource(myDocument, characters);
+		try {
+			var link = app.activeDocument.hyperlinks.add(source, hyperLink);
+		} catch (err) {
+			alert(err)
+		}
+	}
+	return paragraph;
+}
+
+function appendH3Subtitle(specs, story) {
+	var content = "";
+	content += specs.content;
+
+	if (specs.extra) {
+		content += " \u2013 " + specs.extra + "\t"
+	}
+
+	if (specs.startDate) {
+		content += makeDateString(specs.startDate, specs.endDate)
+	} else if (specs.date) {
+		content += specs.date;
+	}
+
+	var paragraph = appendPara(content, story, paraStyles.h3Subtitle);
+	if (specs.link) {
+		var hyperLink = addHyperlinkDestination(myDocument, specs.link);
+		var characters = paragraph.characters.itemByRange(0, content.length - 1);
+		var source = addHyperlinkTextSource(myDocument, characters);
+		try {
+			var link = app.activeDocument.hyperlinks.add(source, hyperLink);
+		} catch (err) {
+			alert(err)
+		}
+	}
+	return paragraph;
+}
+
 function appendLabeledBullet(specs, story) {
     var content = "";
     if (specs.label) {
@@ -176,7 +247,7 @@ function appendLabeledBullet(specs, story) {
     if (specs.extra) {
         content += " \u2013 " + specs.extra
     }
-    var paragraph = appendPara(content, story, paraStyles.dateBullet);
+    var paragraph = appendPara(content, story, paraStyles.publicationBullet);
     if (specs.link) {
         var hyperLink = addHyperlinkDestination(myDocument, specs.link);
         var characters = paragraph.characters.itemByRange(0, content.length - 1);
@@ -191,13 +262,13 @@ function appendLabeledBullet(specs, story) {
 }
 
 function appendHangingBullet(content, story) {
-    var content = "\u2022 " + content;
-    return appendPara(content, story, paraStyles.hangingBullet);
+    //var content = "\u2022 " + content;
+    return appendPara(content, story, paraStyles.indentedBullet);
 }
 
 function appendHangingBulletLinked(content, link, story) {
-    var content = "\u2022 " + content;
-    var para = appendPara(content, story, paraStyles.hangingBullet);
+    //var content = "\u2022 " + content;
+    var para = appendPara(content, story, paraStyles.indentedBullet);
     setLinkRange(para.characters.itemByRange(0, -1), link)
     return para;
 }
@@ -213,19 +284,20 @@ function main() {
         resume = JSON.parse(content);
         resumeFile.close(); // always close files after reading
     } else {
-        alert("Bah!");
+        alert("Couldn't open CV JSON file");
         return;
     }
 
     // Set some file metadata
-    with(myDocument.metadataPreferences) {
-        author = resume["basics"]["name"];
-        description = resume["basics"]["summary"];
-    }
+    myDocument.metadataPreferences.author = resume["basics"]["name"];
+    myDocument.metadataPreferences.description = resume["basics"]["summary"];
+    
 
-    // The template uses this variables in the headers
+    // The template uses these variables in the headers
     setTextVariable("Name", resume["basics"]["name"])
     setTextVariable("Title", resume["basics"]["label"])
+
+    // Clear out anything in the main frame
     var insertionPoint = app.selection[0];
     var mainStory = insertionPoint.parent;
     mainStory.contents = "";
@@ -238,199 +310,268 @@ function main() {
     var textVar = mainStory.textVariableInstances.add(LocationOptions.AFTER, titlePara.insertionPoints[0]);
     textVar.associatedTextVariable = myDocument.textVariables.item("Title");
 
-    appendPara("Education", mainStory, paraStyles.sectionTitleFirst)
-    var education = resume["education"]
-    for (var i = 0; i < education.length; i++) {
-        var item = education[i];
-        item.content = item.institution
-        item.extra = item.organization
-        appendDateBullet(item, mainStory)
-        appendHangingBullet(item["studyType"] + " " + item["area"], mainStory)
-        var highlights = item["highlights"]
-        if (!highlights) {
-            continue;
-        }
-        for (var j = 0; j < highlights.length; j++) {
-            var highlight = highlights[j]
-            if (highlight instanceof String) {
-                appendHangingBullet(highlight, mainStory)
-            } else {
-                appendHangingBulletLinked(highlight.description, highlight.link, mainStory)
-            }
-        }
-    }
 
-
-    appendPara("Conference", mainStory, paraStyles.sectionTitle)
     var publications = resume["publications"]
-    var conference = [];
-    var journal = [];
-    var symposium_workshop = [];
-    for (var i = 0; i < publications.length; i++) {
-        var item = publications[i];
-        if (item.type == "conference") {
-            conference.push(item);
-        } else if (item.type == "journal") {
-            journal.push(item)
-        } else if (item.type == "symposium" || item.type == "workshop") {
-            symposium_workshop.push(item)
-        }
-    }
+	var conference = [];
+	var journal = [];
+	var symposium_workshop = [];
+	for (var i = 0; i < publications.length; i++) {
+	    var item = publications[i];
+	    if (item.type == "conference") {
+	        conference.push(item);
+	    } else if (item.type == "journal") {
+	        journal.push(item)
+	    } else if (item.type == "symposium" || item.type == "workshop") {
+	        symposium_workshop.push(item)
+	    }
+	}
 
-    for (var i = 0; i < conference.length; i++) {
-        var item = conference[i];
-        item.content = "\"" +item.name + ".\" " + item.authors + ". " + item.publisher + ". " + item.location + ", " + item.releaseDate
-        item.label = "[c" + (conference.length - i) + "]"
-        var bullet = appendLabeledBullet(item, mainStory)
-        var startIdx = item.label.length + item.name.length + item.authors.length + 6
-        var characters = bullet.characters.itemByRange(startIdx, startIdx + item.publisher.length)
-        characters.appliedCharacterStyle = charStyles.italic
+	var volunteerItems = resume["volunteer"]
+	var serviceItems = []
+	var reviewing = {}
 
-    }
+	var venueWebsites = {};
+	for (var i = 0; i < volunteerItems.length; i++) {
+		var item = volunteerItems[i];
+		if (item.position == "Reviewer") {
+			if (!(item.shortName in reviewing)){
+				reviewing[item.shortName] = []
+			} 
+			reviewing[item.shortName].push(item.date)
+			if (item.website) {
+				venueWebsites[item.shortName] = item.website
+			}
+		}
+		else {
+			serviceItems.push(item)
+		}
+	}
+	var reviewingOrderedKeys = [];
+	for (var key in reviewing) {
+		reviewingOrderedKeys.push(key)
+	}
+	reviewingOrderedKeys.sort(function(a,b){
+		var mostRecentA = reviewing[a][0]
+		var mostRecentB = reviewing[b][0]
+		var diff = mostRecentB - mostRecentA
+		if (diff == 0) {
+			diff = (a > b)
+		}
+		return diff
+	})
 
-    appendPara("Journal", mainStory, paraStyles.sectionTitle)
-    for (var i = 0; i < journal.length; i++) {
-        var item = journal[i];
-        item.content = "\"" + item.name + ".\" " + item.authors + ". " + item.publisher + ". " + item.releaseDate
-        item.label = "[j" + (journal.length - i) + "]"
-        var bullet = appendLabeledBullet(item, mainStory)
-        var startIdx = item.label.length + item.name.length + item.authors.length + 6
-        var characters = bullet.characters.itemByRange(startIdx, startIdx + item.publisher.length)
-        characters.appliedCharacterStyle = charStyles.italic
-    }
+    //var order = ["Education", "Conference","Journal","Refereed Symposium, Workshop", "Presentations", "Recognition","Outreach","Service", "Reviewing","Grants Received", "Meeting Participation", "Work and Teaching Experience", "Skills", "Personal"]
+    var order = ["Education", "Conference","Journal","Refereed Symposium, Workshop", "Recognition","Outreach","Service", "Reviewing", "Work and Teaching Experience", "Skills", "Personal"]
+    for (var i = 0; i < order.length; i++) {
+    	var sectionName = order[i];
+		appendPara(sectionName, mainStory, paraStyles.h1);
+		switch (sectionName) {
+			case "Education":
+			var education = resume["education"]
+			for (var j = 0; j < education.length; j++) {
+			    var item = education[j];
+			    item.content = item.institution
+			    item.extra = item.location
+			    appendH3DateSubtitle(item, mainStory)
+			    appendHangingBullet(item["studyType"] + " " + item["area"], mainStory)
+			    var highlights = item["highlights"]
+			    if (!highlights) {
+			        continue;
+			    }
+			    for (var k = 0; k < highlights.length; k++) {
+			        var highlight = highlights[k]
+			        if (highlight instanceof String) {
+			            appendHangingBullet(highlight, mainStory)
+			        } else {
+			            appendHangingBulletLinked(highlight.description, highlight.link, mainStory)
+			        }
+			    }
+			}
+			break;
+			case "Conference":
 
-    appendPara("Refereed Symposium, Workshop", mainStory, paraStyles.sectionTitle)
-    for (var i = 0; i < symposium_workshop.length; i++) {
-        var item = symposium_workshop[i];
-        item.content = "\"" + item.name + ".\" " + item.authors + ". " + item.publisher + ". " + item.location + ", " + item.releaseDate
-        item.label = "[w" + (symposium_workshop.length - i) + "]"
-        var bullet = appendLabeledBullet(item, mainStory)
-        var startIdx = item.label.length + item.name.length + item.authors.length + 6
-        var characters = bullet.characters.itemByRange(startIdx, startIdx + item.publisher.length)
-        characters.appliedCharacterStyle = charStyles.italic
-    }
+			for (var j = 0; j < conference.length; j++) {
+			    var item = conference[j];
+			    item.content = "\"" +item.name + ".\" " + item.authors + ". " + item.publisher + ". " + item.location + ", " + item.releaseDate
+			    item.label = "[c" + (conference.length - j) + "]"
+			    var bullet = appendLabeledBullet(item, mainStory)
+			    var startIdx = item.label.length + item.name.length + item.authors.length + 6
+			    var characters = bullet.characters.itemByRange(startIdx, startIdx + item.publisher.length)
+			    characters.appliedCharacterStyle = charStyles.italic
 
-    appendPara("Presentations", mainStory, paraStyles.sectionTitle)
-    var presentations = resume["presentations"]
-    for (var i = 0; i < presentations.length; i++) {
-        var item = presentations[i];
-        item.content = item.name + ". " + item.authors + ". " + item.venue + ". " + item.location + ". " + item.format + "."
-        if (item.note) {
-            item.content += " " + item.note + "."
-        }
-        appendDateBullet(item, mainStory)
-    }
+			}
+			break;
+			case "Journal":
+			for (var j = 0; j < journal.length; j++) {
+			    var item = journal[j];
+			    item.content = "\"" + item.name + ".\" " + item.authors + ". " + item.publisher + ". " + item.releaseDate
+			    item.label = "[j" + (journal.length - j) + "]"
+			    var bullet = appendLabeledBullet(item, mainStory)
+			    var startIdx = item.label.length + item.name.length + item.authors.length + 6
+			    var characters = bullet.characters.itemByRange(startIdx, startIdx + item.publisher.length)
+			    characters.appliedCharacterStyle = charStyles.italic
+			}
+			break;
+			case "Refereed Symposium, Workshop":
+			for (var j = 0; j < symposium_workshop.length; j++) {
+			    var item = symposium_workshop[j];
+			    item.content = "\"" + item.name + ".\" " + item.authors + ". " + item.publisher + ". " + item.location + ", " + item.releaseDate
+			    item.label = "[w" + (symposium_workshop.length - j) + "]"
+			    var bullet = appendLabeledBullet(item, mainStory)
+			    var startIdx = item.label.length + item.name.length + item.authors.length + 6
+			    var characters = bullet.characters.itemByRange(startIdx, startIdx + item.publisher.length)
+			    characters.appliedCharacterStyle = charStyles.italic
+			}
+			break;
+			case "Presentations":
+			var presentations = resume["presentations"]
+			for (var j = 0; j < presentations.length; j++) {
+			    var item = presentations[j];
+			    item.content = item.name + ". " + item.authors + ". " + item.venue + ". " + item.location + ". " + item.format + "."
+			    if (item.note) {
+			        item.content += " " + item.note + "."
+			    }
+			    appendDateBullet(item, mainStory)
+			}
+			break;
+			case "Recognition":
+			var recognition = resume["awards"]
+			for (var j = 0; j < recognition.length; j++) {
+			    var item = recognition[j];
+			    item.content = item.title
+			    item.extra = item.awarder
+			    appendDateBullet(item, mainStory)
+			}
+			break;
+			case "Research Competitions":
+			var competitions = resume["competitions"]
+			for (var j = 0; j < competitions.length; j++) {
+			    var item = competitions[j];
+			    item.content = item.result
+			    item.extra = item.name
+			    appendDateBullet(item, mainStory)
+			}
+			break;
+			case "Research Affiliations":
+			var affiliations = resume["affiliations"]
+			for (var j = 0; j < affiliations.length; j++) {
+			    var item = affiliations[j];
+			    item.content = item.name
+			    item.extra = item.institution
+			    appendDateBullet(item, mainStory)
+			    if (item.summary) {
+			        appendHangingBullet(item["summary"], mainStory)
+			    }
+			}
+			break;
+			case "Outreach":
+			var outreach = resume["outreach"]
+			for (var j = 0; j < outreach.length; j++) {
+			    var item = outreach[j];
+			    item.content = item.position
+			    item.extra = item.organization
+			    item.link = item.website
+			    appendH3DateSubtitle(item, mainStory)
+			    appendHangingBullet(item["summary"], mainStory)
+			}
+			break;
+			case "Service":
+			for (var j = 0; j < serviceItems.length; j++) {
+			    var item = serviceItems[j];
+			    item.content = item.position
+			    item.extra = item.organization
+			    item.link = item.website
+			    appendDateBullet(item, mainStory)
+			}
+			break;
+			case "Reviewing":
+				var entries = ""
+				var spans = []
+			for (var j = 0; j < reviewingOrderedKeys.length; j++) {
+				var key = reviewingOrderedKeys[j]
+				var yearString = ""
+				var years = reviewing[key]
+			    for (var k = 0; k < years.length; k++) {
+			        yearString += "\u0027" + years[k].slice(2) + ", "
+			    }
+			    yearString = yearString.slice(0, -2)
+				toAdd = key + "\t" + yearString + "\n";
+				spans.push([entries.length, entries.length + toAdd.length - 1])
+				entries += toAdd;
+			}
+				// Drop the last newline character
+				var organizationPara = appendPara(entries.substr(0,entries.length - 1), mainStory, paraStyles.bulletYears)
+				for (var j = 0; j < spans.length; j++) {
+					var key = reviewingOrderedKeys[j]
+					var span = spans[j]
+					setLinkRange(organizationPara.characters.itemByRange(span[0], span[1]), venueWebsites[key])
 
-    appendPara("Recognition", mainStory, paraStyles.sectionTitle)
-    var recognition = resume["awards"]
-    for (var i = 0; i < recognition.length; i++) {
-        var item = recognition[i];
-        item.content = item.title
-        item.extra = item.awarder
-        appendDateBullet(item, mainStory)
-    }
+				}
+			break;
+			case "Grants Received":
+			var grants = resume["grants"]
+			for (var j = 0; j < grants.length; j++) {
+			    var item = grants[j];
+			    item.content = item.name
+			    item.extra = item.awarder
+			    appendDateBullet(item, mainStory)
+			    if (item.summary) {
+			        appendHangingBullet(item["summary"], mainStory)
+			    }
+			}
+			break;
+			case "Meeting Participation":
+			var meetings = resume["meetings"]
+			for (var j = 0; j < meetings.length; j++) {
+			    var item = meetings[j];
+			    item.content = item.name + ", " + item.location
+			    appendDateBullet(item, mainStory)
+			}
+			break;
+			case "Work and Teaching Experience":
+			var work = resume["work"]
+			for (var j = 0; j < work.length; j++) {
+			    var item = work[j];
+			    item.content = item.position
+			    item.extra = item.company
+			    item.link = item.website
+			    appendH3DateSubtitle(item, mainStory)
+			    for (var k = 0; k < item.highlights.length; k++) {
+			        appendHangingBullet(item.highlights[k], mainStory)
+			    }
+			}
+			break;
+			case "Skills":
+			var skills = resume["skills"]
+			for (var j = 0; j < skills.length; j++) {
+			    var item = skills[j];
+			    item.content = "" + item.level + " with " + item.name.toLowerCase()
+			    item.extra = ""
+			    for (var k = 0; k < item.keywords.length; k++) {
+			        item.extra += item.keywords[k] + ", "
+			    }
+			    item.extra = item.extra.slice(0, -2)
+			    appendHangingBullet(item.content + " \u2013 " + item.extra, mainStory)
+			}
+			break;
+			case "Personal":
+			var profiles = resume["basics"]["profiles"]
+			var homePageURL = resume["basics"]["website"]
+			var homePageNoProtocol = homePageURL.substr(8)
+			var homePara = appendPara("\u2003" + homePageNoProtocol, mainStory, paraStyles.indented)
+			addIcon("home", homePara.insertionPoints[0])
+			setLinkRange(homePara.characters.itemByRange(0, -1), homePageURL)
+			for (var j = 0; j < profiles.length; j++) {
+			    var profile = profiles[j]
+				// Em space then URL of profile
+			    var profilePara = appendPara("\u2003" + profile.url.substr(8), mainStory, paraStyles.indented)
+			    var iconName = profile.network.toLowerCase()
+			    addBrandIcon(iconName, profilePara.insertionPoints[0])
+			    setLinkRange(profilePara.characters.itemByRange(0, -1), profile.url)
+			}
+			break;	
 
-    appendPara("Research Competitions", mainStory, paraStyles.sectionTitle)
-    var competitions = resume["competitions"]
-    for (var i = 0; i < competitions.length; i++) {
-        var item = competitions[i];
-        item.content = item.result
-        item.extra = item.name
-        appendDateBullet(item, mainStory)
-    }
-
-    appendPara("Research Affiliations", mainStory, paraStyles.sectionTitle)
-    var affiliations = resume["affiliations"]
-    for (var i = 0; i < affiliations.length; i++) {
-        var item = affiliations[i];
-        item.content = item.name
-        item.extra = item.institution
-        appendDateBullet(item, mainStory)
-        if (item.summary) {
-            appendHangingBullet(item["summary"], mainStory)
-        }
-    }
-
-    appendPara("Outreach", mainStory, paraStyles.sectionTitle)
-    var outreach = resume["outreach"]
-    for (var i = 0; i < outreach.length; i++) {
-        var item = outreach[i];
-        item.content = item.position
-        item.extra = item.organization
-        item.link = item.website
-        appendDateBullet(item, mainStory)
-        appendHangingBullet(item["summary"], mainStory)
-    }
-
-    appendPara("Service", mainStory, paraStyles.sectionTitle)
-    var serviceItems = resume["volunteer"]
-    for (var i = 0; i < serviceItems.length; i++) {
-        var item = serviceItems[i];
-        item.content = item.position
-        item.extra = item.organization
-        item.link = item.website
-        appendDateBullet(item, mainStory)
-    }
-
-    appendPara("Grants Received", mainStory, paraStyles.sectionTitle)
-    var grants = resume["grants"]
-    for (var i = 0; i < grants.length; i++) {
-        var item = grants[i];
-        item.content = item.name
-        item.extra = item.awarder
-        appendDateBullet(item, mainStory)
-        if (item.summary) {
-            appendHangingBullet(item["summary"], mainStory)
-        }
-    }
-
-    appendPara("Meeting Participation", mainStory, paraStyles.sectionTitle)
-    var meetings = resume["meetings"]
-    for (var i = 0; i < meetings.length; i++) {
-        var item = meetings[i];
-        item.content = item.name + ", " + item.location
-        appendDateBullet(item, mainStory)
-    }
-
-    appendPara("Work and Teaching Experience", mainStory, paraStyles.sectionTitle)
-    var work = resume["work"]
-    for (var i = 0; i < work.length; i++) {
-        var item = work[i];
-        item.content = item.position
-        item.extra = item.company
-        item.link = item.website
-        appendDateBullet(item, mainStory)
-        for (var j = 0; j < item.highlights.length; j++) {
-            appendHangingBullet(item.highlights[j], mainStory)
-        }
-    }
-
-    appendPara("Skills", mainStory, paraStyles.sectionTitle)
-    var skills = resume["skills"]
-    for (var i = 0; i < skills.length; i++) {
-        var item = skills[i];
-        item.content = "" + item.level + " with " + item.name.toLowerCase()
-        item.extra = ""
-        for (var j = 0; j < item.keywords.length; j++) {
-            item.extra += item.keywords[j] + ", "
-        }
-        item.extra = item.extra.slice(-2)
-        appendHangingBullet(item.content + " \u2013 " + item.extra, mainStory)
-    }
-
-    appendPara("Personal", mainStory, paraStyles.sectionTitle)
-    var profiles = resume["basics"]["profiles"]
-    var homePageURL = resume["basics"]["website"]
-    var homePageNoProtocol = homePageURL.substr(8)
-    var homePara = appendPara("\t" + homePageNoProtocol, mainStory, paraStyles.hangingBullet)
-    addIcon("home", homePara.insertionPoints[0])
-    setLinkRange(homePara.characters.itemByRange(0, -1), homePageURL)
-    for (var i = 0; i < profiles.length; i++) {
-        var profile = profiles[i]
-        var profilePara = appendPara("\t" + profile.url.substr(8), mainStory, paraStyles.hangingBullet)
-        var iconName = profile.network.toLowerCase()
-        addBrandIcon(iconName, profilePara.insertionPoints[0])
-        setLinkRange(profilePara.characters.itemByRange(0, -1), profile.url)
+		}
     }
 }
 
